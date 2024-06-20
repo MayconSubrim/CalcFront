@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,13 @@ export class CalcService {
 
   private performOperation(endpoint: string, num1: number, num2: number): Observable<{ result: number }> {
     const data = { a: num1, b: num2 };
-    return this.http.post<{ result: number }>(`${this.baseUrl}/${endpoint}`, data);
+    return this.http.post<{ result: number }>(`${this.baseUrl}/${endpoint}`, data)
+      .pipe(
+        catchError(error => {
+          console.error('Erro ao realizar a operação:', error);
+          return throwError(error);
+        })
+      );
   }
 
   add(num1: number, num2: number): Observable<{ result: number }> {
