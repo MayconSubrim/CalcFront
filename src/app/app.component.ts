@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CalcService } from './services/calc.service';
+
 
 @Component({
   selector: 'app-root',
@@ -12,7 +13,10 @@ import { CalcService } from './services/calc.service';
 export class AppComponent {
   
   
-  private http : CalcService = inject(CalcService);
+  result: number | null = null;
+  operation: string = 'Operação';
+
+  constructor(private calcService: CalcService) {}
 
   performOperation(operator: string): void {
     const value1 = (document.querySelector('.input-top') as HTMLInputElement).value;
@@ -21,81 +25,74 @@ export class AppComponent {
     const num1 = parseFloat(value1);
     const num2 = parseFloat(value2);
 
-    let result: any ;
-    let operation: string = '';
+    if (isNaN(num1) || isNaN(num2)) {
+      this.result = 0;
+      this.operation = 'Operação inválida';
+      this.displayOperation(this.operation);
+      this.displayResult(this.result);
+      return;
+    }
 
     switch (operator) {
       case '+':
-        if(isNaN(num1) || isNaN(num2)) {
-          result = 0
-        }
-        else{
-          this.http.add(num1,num2).then(response => {
-            this.displayOperation(operator);
-            this.displayResult(response.result);
-          }).catch(error => {
-            console.error(`Erro ao realizar a operação ${operator}:`, error);
-            this.displayOperation(`Erro: ${error.message}`);
-            this.displayResult(null);
-          })
-        }
+        this.calcService.add(num1, num2).subscribe(
+          response => {
+            this.result = response.result;
+            this.operation = '+';
+            this.displayOperation(this.operation);
+            this.displayResult(this.result);
+          },
+          error => {
+            console.error('Erro ao realizar a soma:', error);
+          }
+        );
         break;
       case '-':
-        if(isNaN(num1) || isNaN(num2)) {
-          result = 0
-        }
-        else {
-          this.http.subtract(num1,num2).then(response => {
-            this.displayOperation(operator);
-            this.displayResult(response.result);
-          }).catch(error => {
-            console.error(`Erro ao realizar a operação ${operator}:`, error);
-            this.displayOperation(`Erro: ${error.message}`);
-            this.displayResult(null);
-          })
-        }
+        this.calcService.subtract(num1, num2).subscribe(
+          response => {
+            this.result = response.result;
+            this.operation = '-';
+            this.displayOperation(this.operation);
+            this.displayResult(this.result);
+          },
+          error => {
+            console.error('Erro ao realizar a subtração:', error);
+          }
+        );
         break;
       case '*':
-        if(isNaN(num1) || isNaN(num2)) {
-          result = 0
-        }
-        else {
-          this.http.multiply(num1,num2).then(response => {
-            this.displayOperation(operator);
-            this.displayResult(response.result);
-          }).catch(error => {
-            console.error(`Erro ao realizar a operação ${operator}:`, error);
-            this.displayOperation(`Erro: ${error.message}`);
-            this.displayResult(null);
-          })
-        }
+        this.calcService.multiply(num1, num2).subscribe(
+          response => {
+            this.result = response.result;
+            this.operation = '*';
+            this.displayOperation(this.operation);
+            this.displayResult(this.result);
+          },
+          error => {
+            console.error('Erro ao realizar a multiplicação:', error);
+          }
+        );
         break;
       case '/':
-        if (num2 === 0) {
-          result = result;
-          operation = 'Divisão por zero não é permitida';
-        }
-        else if(isNaN(num1) || isNaN(num2)) {
-          result = 0
-        } else {
-          this.http.divide(num1,num2).then(response => {
-            this.displayOperation(operator);
-            this.displayResult(response.result);
-          }).catch(error => {
-            console.error(`Erro ao realizar a operação ${operator}:`, error);
-            this.displayOperation(`Erro: ${error.message}`);
-            this.displayResult(null);
-          })
-        }
+        this.calcService.divide(num1, num2).subscribe(
+          response => {
+            this.result = response.result;
+            this.operation = '/';
+            this.displayOperation(this.operation);
+            this.displayResult(this.result);
+          },
+          error => {
+            console.error('Erro ao realizar a divisão:', error);
+          }
+        );
         break;
       default:
-        result = 0;
-        operation = 'Operação inválida';
+        this.result = 0;
+        this.operation = 'Operação inválida';
+        this.displayOperation(this.operation);
+        this.displayResult(this.result);
         break;
     }
-
-    this.displayOperation(operation);
-    this.displayResult(result);
   }
 
   displayOperation(operation: string): void {
@@ -104,9 +101,7 @@ export class AppComponent {
   }
 
   displayResult(result: number | null): void {
-    console.log(result)
     const resultDisplay = document.querySelector('.result') as HTMLElement;
-    if(result != null && result != undefined)
-    resultDisplay.textContent = result.toFixed(2).toString();
+    resultDisplay.textContent = result !== null ? result.toFixed(2).toString() : '';
   }
 }

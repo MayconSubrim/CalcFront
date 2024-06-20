@@ -1,4 +1,6 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -6,44 +8,26 @@ import { Injectable } from '@angular/core';
 export class CalcService {
   private baseUrl = 'http://localhost:3000/calc';
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
-  private async performOperation(endpoint: string, num1: number, num2: number): Promise<{ result: number }> {
+  private performOperation(endpoint: string, num1: number, num2: number): Observable<{ result: number }> {
     const data = { a: num1, b: num2 };
-    const requestOptions: RequestInit = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    };
-
-    return fetch(`${this.baseUrl}/${endpoint}`, requestOptions)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Erro na requisição: ' + response.statusText);
-        }
-        return response.json();
-      })
-      .catch(error => {
-        console.error('Erro ao realizar a operação:', error);
-        throw error;
-      });
+    return this.http.post<{ result: number }>(`${this.baseUrl}/${endpoint}`, data);
   }
 
-  add(num1: number, num2: number): Promise<{ result: number }> {
+  add(num1: number, num2: number): Observable<{ result: number }> {
     return this.performOperation('add', num1, num2);
   }
 
-  subtract(num1: number, num2: number): Promise<{ result: number }> {
+  subtract(num1: number, num2: number): Observable<{ result: number }> {
     return this.performOperation('subtract', num1, num2);
   }
 
-  divide(num1: number, num2: number): Promise<{ result: number }> {
+  divide(num1: number, num2: number): Observable<{ result: number }> {
     return this.performOperation('divide', num1, num2);
   }
 
-  multiply(num1: number, num2: number): Promise<{ result: number }> {
+  multiply(num1: number, num2: number): Observable<{ result: number }> {
     return this.performOperation('multiply', num1, num2);
   }
 }
