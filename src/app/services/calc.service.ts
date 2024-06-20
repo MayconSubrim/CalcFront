@@ -7,7 +7,7 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class CalcService {
-  private baseUrl = 'http://localhost:3000/calc';
+  private baseUrl = 'https://calc-back.vercel.app/calc';
 
   constructor(private http: HttpClient) {}
 
